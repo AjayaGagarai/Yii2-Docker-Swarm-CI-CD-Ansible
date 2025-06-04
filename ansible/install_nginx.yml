@@ -1,0 +1,37 @@
+- name: Install NGINX
+  hosts: all
+  become: true
+  tasks:
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Enable and start NGINX
+      systemd:
+        name: nginx
+        enabled: true
+        state: started
+
+    - name: Copy NGINX config
+      copy:
+        src: ../nginx/yii2.conf
+        dest: /etc/nginx/sites-available/yii2.conf
+
+    - name: Enable site config
+      file:
+        src: /etc/nginx/sites-available/yii2.conf
+        dest: /etc/nginx/sites-enabled/yii2.conf
+        state: link
+        force: true
+
+    - name: Remove default site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Reload NGINX
+      systemd:
+        name: nginx
+        state: reloaded
